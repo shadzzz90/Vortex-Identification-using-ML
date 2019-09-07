@@ -24,6 +24,15 @@ def relu(Z):
 def sigmoid(Z):
     return 1/(1+np.exp(-Z))
 
+def sigmoid_backward(dA, Z):
+    sig = sigmoid(Z)
+    return dA*sig*(1-sig)
+
+def relu_backward(dA, Z):
+    dZ = np.array(dA, copy=True)
+    dZ[Z<=0] = 0
+    return dZ
+
 def forwardPropagation (X, parameter_values, NNStructure):
 
     A_prev = X
@@ -44,14 +53,32 @@ def forwardPropagation (X, parameter_values, NNStructure):
     return memory
 
 #
-# def backwardPropagation(Y_hat, Y, memory, NNStructure):
-#     grad_values = {}
-#     m = Y.shape[1]
-#     Y = Y.reshape(Y_hat.shape)
-#     dA_prev = - (np.divide(Y, Y_hat) - np.divide(1 - Y, 1 - Y_hat))
-#
-#     for layer_index, layer in reversed(list(enumerate(NNStructure))):
-#
+def backwardPropagation(Y_hat, Y, memory, parameter_values,  NNStructure):
+    grad_values = {}
+    m = Y.shape[1]
+    Y = Y.reshape(Y_hat.shape)
+    dA_prev = - (np.divide(Y, Y_hat) - np.divide(1 - Y, 1 - Y_hat))
+
+    for layer_index, layer in reversed(list(enumerate(NNStructure))):
+        layer_current_index = layer_index + 1
+
+        if layer['activation'] is "relu":
+            dZ = relu_backward(dA_prev, memory["Z" + str(layer_current_index)])
+
+        elif layer['activation'] is "sigmoid" :
+            dZ = sigmoid_backward(dA_prev, memory["Z" + str(layer_current_index)])
+
+        dW = np.dot(dZ, parameter_values["A"+str(layer_index)].T)
+        db = np.sum(dZ, axis=1 , keepdims=True)/m
+        dA = np.dot(parameter_values["W"+str(layer_current_index)].T, dZ)
+
+        dA_prev = dA
+
+        grad_values["dW"+str(layer_current_index)] = dW
+        grad_values["db"+str(layer_current_index)] = db
+
+    return grad_values
+
 
 
 
