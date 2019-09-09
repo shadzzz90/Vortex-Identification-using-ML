@@ -22,14 +22,14 @@ N_SAMPLES = 1000
 # ratio between training and test sets
 TEST_SIZE = 0.1
 
-nn_architecture = [{"input_dim":2 , "output_dim":4, "activation":"relu"},
-                   {"input_dim":4 , "output_dim":6, "activation":"relu"},
-                   {"input_dim":6 , "output_dim":6, "activation":"relu"},
-                   {"input_dim":6 , "output_dim":4, "activation":"relu"},
-                   {"input_dim":4 , "output_dim":1, "activation":"sigmoid"}]
+nn_architecture = [{"input_dim":2 , "output_dim":25, "activation":"relu"},
+                   {"input_dim":25 , "output_dim":50, "activation":"relu"},
+                   {"input_dim":50 , "output_dim":50, "activation":"relu"},
+                   {"input_dim":50 , "output_dim":25, "activation":"relu"},
+                   {"input_dim":25 , "output_dim":1, "activation":"sigmoid"}]
 
 
-def init_layers(nn_architecture, seed = 99):
+def init_layers(nn_architecture, seed = 2):
     np.random.seed(seed)
 
     num_of_layers = len(nn_architecture)
@@ -159,10 +159,10 @@ def full_backward_propagation(Y_hat, Y, memory, params_values, nn_architecture):
 
 def update(params_values, grads_values, nn_architecture, learning_rate):
     for layer_idx, layer in enumerate(nn_architecture):
-        params_values["W" + str(layer_idx)] -= learning_rate * grads_values["dW" + str(layer_idx)]
-        params_values["b" + str(layer_idx)] -= learning_rate * grads_values["db" + str(layer_idx)]
+        params_values["W" + str(layer_idx+1)] -= learning_rate * grads_values["dW" + str(layer_idx+1)]
+        params_values["b" + str(layer_idx+1)] -= learning_rate * grads_values["db" + str(layer_idx+1)]
 
-    return params_values;
+    return params_values
 
 
 def train(X, Y, nn_architecture, epochs, learning_rate):
@@ -195,6 +195,10 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE, r
 # transpose_y_train = np.transpose(y_train2)
 #
 # print(transpose_y_train, transpose_y_train.shape, transpose_X_train, transpose_X_train.shape)
-params_values = train(np.transpose(X_train), np.transpose(y_train.reshape((y_train.shape[0], 1))), nn_architecture , 10000, 0.01)
+params_values, cost_history, acc_history = train(np.transpose(X_train), np.transpose(y_train.reshape((y_train.shape[0], 1))), nn_architecture , 10000, 0.01)
+epochs = range(10000)
+plt.plot(epochs, acc_history)
+
+plt.show()
 
 # print(X,y)
